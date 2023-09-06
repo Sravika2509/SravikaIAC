@@ -3,31 +3,37 @@
   hosts: database_servers
   become: yes
   tasks:
+    - name: Gather Facts
+      setup:
+
+    - name: Determine OS Distribution
+      set_fact:
+        os_distribution: "{{ ansible_facts['ansible_distribution'] | lower }}"
+      when: "'ansible_distribution' in ansible_facts"
+
     - name: Install MySQL Server (Amazon Linux)
       yum:
         name: mysql-server
         state: present
-      when: os_distribution.stdout == 'amzn'
-      register: mysql_install_output
+      when: os_distribution == 'amazon'
 
     - name: Get MySQL Server Version
       command: mysql -v
       register: mysql_version_output
       changed_when: false
-      when: os_distribution.stdout == 'amzn'
+      when: os_distribution == 'amazon'
 
     - name: Install Redis Server (Amazon Linux)
       yum:
         name: redis
         state: present
-      when: os_distribution.stdout == 'amzn'
-      register: redis_install_output
+      when: os_distribution == 'amazon'
 
     - name: Get Redis Server Version
       command: redis-server --version
       register: redis_version_output
       changed_when: false
-      when: os_distribution.stdout == 'amzn'
+      when: os_distribution == 'amazon'
 
     - name: Display Results
       debug:
