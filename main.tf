@@ -36,7 +36,7 @@ resource "aws_security_group" "allow_all" {
 resource "aws_instance" "my_instances" {
   count = 8
 
-  ami           = "ami-0c55b159cbfafe1f0"  # Modify this to your desired AMI
+  ami           = "ami-05fa00d4c63e32376"  # Modify this to your desired AMI
   instance_type = "t2.micro"  # Modify this to your desired instance type
 
   subnet_id          = aws_subnet.my_subnet[count.index].id
