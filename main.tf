@@ -43,6 +43,8 @@ resource "aws_instance" "my_instances" {
 
   # Associate the instances with the security group
   vpc_security_group_ids = [aws_security_group.my_security_group.id]
+  
+  key_name = aws_key_pair.my_key_pair.key_name
 
   tags = {
     Name = "server-${count.index + 1}"
@@ -53,4 +55,15 @@ resource "aws_instance" "my_instances" {
 output "instance_ips" {
   value = aws_instance.my_instances[*].private_ip
 }
+
+resource "aws_key_pair" "my_key_pair" {
+  key_name   = "my-key-pair"
+}
+
+# Output the private key to a local file.
+resource "local_file" "private_key" {
+  filename = "/id_rsa"
+  content  = aws_key_pair.my_key_pair.private_key
+}
+
 
