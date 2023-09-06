@@ -1,0 +1,35 @@
+---
+- name: Install MySQL and Redis
+  hosts: database_servers
+  become: yes
+  tasks:
+    - name: Install MySQL Server
+      apt:
+        name: mysql-server
+        state: present
+      register: mysql_install_output
+
+    - name: Get MySQL Server Version
+      command: mysql -v
+      register: mysql_version_output
+      changed_when: false
+
+    - name: Install Redis Server
+      apt:
+        name: redis-server
+        state: present
+      register: redis_install_output
+
+    - name: Get Redis Server Version
+      command: redis-server --version
+      register: redis_version_output
+      changed_when: false
+
+    - name: Display Results
+      debug:
+        var: "{{ item }}"
+      with_items:
+        - mysql_install_output
+        - mysql_version_output
+        - redis_install_output
+        - redis_version_output
