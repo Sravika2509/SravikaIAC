@@ -15,7 +15,8 @@ pipeline {
                  script{
                         dir("terraform")
                         {
-                            git "https://github.com/Sravika2509/SravikaIAC.git"
+                           
+							git branch: 'main', url: 'https://github.com/Sravika2509/SravikaIAC.git'
                         }
                     }
                 }
