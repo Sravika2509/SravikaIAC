@@ -3,17 +3,16 @@
   hosts: database_servers
   become: yes
   tasks:
-    - name: Gather Facts
-      setup:
-
-    - name: Determine OS Distribution
-      set_fact:
-        os_distribution: "{{ ansible_facts['ansible_distribution'] | lower }}"
-      when: "'ansible_distribution' in ansible_facts"
+    - name: Update Package Cache (Amazon Linux)
+      command: "{{ item }}"
+      with_items:
+        - yum clean all
+        - yum makecache
+      when: os_distribution == 'amazon'
 
     - name: Install MySQL Server (Amazon Linux)
       yum:
-        name: mysql-server
+        name: mysql
         state: present
       when: os_distribution == 'amazon'
 
