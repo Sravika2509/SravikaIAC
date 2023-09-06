@@ -58,9 +58,5 @@ output "instance_ips" {
 
 resource "aws_key_pair" "my_key_pair" {
   key_name   = "id_rsa"
-  public_key=file("/var/jenkins_home/workspace/id_rsa.pub")
+  public_key=file("id_rsa.pub")
 }
-
-
-
-
