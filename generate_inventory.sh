@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Specify the path to the SSH private key (provided by Terraform output).
-SSH_PRIVATE_KEY_PATH=".ssh/id_rsa"
+SSH_PRIVATE_KEY_PATH="/var/jenkins_home/workspace/id_rsa"
 
 # Set the Ansible SSH user to "ec2-user"
 ANSIBLE_USER="ec2-user"

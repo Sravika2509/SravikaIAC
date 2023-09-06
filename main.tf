@@ -58,13 +58,9 @@ output "instance_ips" {
 
 resource "aws_key_pair" "my_key_pair" {
   key_name   = "id_rsa"
-  public_key=file(".ssh/id_rsa.pub")
+  public_key=file("/var/jenkins_home/workspace/id_rsa.pub")
 }
 
-# Output the private key to a local file.
-resource "local_file" "private_key" {
-  filename = ".ssh/id_rsa"
-  content  = aws_key_pair.my_key_pair.public_key
-}
+
 
 
