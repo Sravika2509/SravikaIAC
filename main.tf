@@ -1,11 +1,14 @@
+# Define the AWS provider with your credentials and desired region.
 provider "aws" {
-  region = "us-east-1"  # Modify this to your desired AWS region gg
+  region = "us-east-1"  # Modify this to your desired AWS region
 }
 
+# Create a VPC.
 resource "aws_vpc" "my_vpc" {
   cidr_block = "10.0.0.0/16"  # Modify this CIDR block as needed
 }
 
+# Create subnets in the VPC.
 resource "aws_subnet" "my_subnet" {
   count             = 8
   vpc_id            = aws_vpc.my_vpc.id
@@ -13,40 +16,41 @@ resource "aws_subnet" "my_subnet" {
   availability_zone = "us-east-1a"  # Modify this to your desired AZ
 }
 
-resource "aws_security_group" "allow_all" {
-  name        = "allow_all"
-  description = "Allow all inbound traffic"
+# Create a security group allowing inbound SSH and other necessary ports.
+resource "aws_security_group" "my_security_group" {
+  name        = "my-security-group"
+  description = "Allow SSH and other necessary ports"
   vpc_id      = aws_vpc.my_vpc.id
 
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
+  # Define your ingress rules here.
+  # Example: allow SSH traffic from anywhere
   ingress {
-    from_port   = 0
-    to_port     = 65535
+    from_port   = 22
+    to_port     = 22
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
 
+# Create EC2 instances in the subnets.
 resource "aws_instance" "my_instances" {
   count = 8
 
   ami           = "ami-05fa00d4c63e32376"  # Modify this to your desired AMI
   instance_type = "t2.micro"  # Modify this to your desired instance type
 
-  subnet_id          = aws_subnet.my_subnet[count.index].id
-  security_groups    = [aws_security_group.allow_all.name]
+  subnet_id = aws_subnet.my_subnet[count.index].id
+
+  # Associate the instances with the security group
+  vpc_security_group_ids = [aws_security_group.my_security_group.id]
 
   tags = {
     Name = "server-${count.index + 1}"
   }
 }
 
+# Output the private IP addresses of the EC2 instances.
 output "instance_ips" {
   value = aws_instance.my_instances[*].private_ip
 }
+
