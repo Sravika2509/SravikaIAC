@@ -4,7 +4,7 @@
   become: yes
   tasks:
     - name: Check OS Distribution
-      command: "cat /etc/os-release | grep -i 'ID=' | awk -F'=' '{print $2}' | tr -d '\"'"
+      command: "cat /etc/os-release | grep 'ID=' | awk -F'=' '{print $2}' | tr -d '\"'"
       register: os_distribution
       changed_when: false
 
@@ -12,14 +12,14 @@
       apt:
         name: mysql-server
         state: present
-      when: "os_distribution.stdout == 'debian' or os_distribution.stdout == 'ubuntu'"
+      when: os_distribution.stdout == 'debian' or os_distribution.stdout == 'ubuntu'
       register: mysql_install_output
 
     - name: Install MySQL Server (CentOS/RHEL)
       yum:
         name: mysql-server
         state: present
-      when: "os_distribution.stdout == 'centos' or os_distribution.stdout == 'rhel'"
+      when: os_distribution.stdout == 'centos' or os_distribution.stdout == 'rhel'
       register: mysql_install_output
 
     - name: Get MySQL Server Version
@@ -31,14 +31,14 @@
       apt:
         name: redis-server
         state: present
-      when: "os_distribution.stdout == 'debian' or os_distribution.stdout == 'ubuntu'"
+      when: os_distribution.stdout == 'debian' or os_distribution.stdout == 'ubuntu'
       register: redis_install_output
 
     - name: Install Redis Server (CentOS/RHEL)
       yum:
         name: redis
         state: present
-      when: "os_distribution.stdout == 'centos' or os_distribution.stdout == 'rhel'"
+      when: os_distribution.stdout == 'centos' or os_distribution.stdout == 'rhel'
       register: redis_install_output
 
     - name: Get Redis Server Version
