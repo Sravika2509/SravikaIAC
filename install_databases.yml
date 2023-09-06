@@ -3,48 +3,31 @@
   hosts: database_servers
   become: yes
   tasks:
-    - name: Check OS Distribution
-      command: "cat /etc/os-release | grep 'ID=' | awk -F'=' '{print $2}' | tr -d '\"'"
-      register: os_distribution
-      changed_when: false
-
-    - name: Install MySQL Server (Debian/Ubuntu)
-      apt:
-        name: mysql-server
-        state: present
-      when: os_distribution.stdout == 'debian' or os_distribution.stdout == 'ubuntu'
-      register: mysql_install_output
-
-    - name: Install MySQL Server (CentOS/RHEL)
+    - name: Install MySQL Server (Amazon Linux)
       yum:
         name: mysql-server
         state: present
-      when: os_distribution.stdout == 'centos' or os_distribution.stdout == 'rhel'
+      when: os_distribution.stdout == 'amzn'
       register: mysql_install_output
 
     - name: Get MySQL Server Version
       command: mysql -v
       register: mysql_version_output
       changed_when: false
+      when: os_distribution.stdout == 'amzn'
 
-    - name: Install Redis Server (Debian/Ubuntu)
-      apt:
-        name: redis-server
-        state: present
-      when: os_distribution.stdout == 'debian' or os_distribution.stdout == 'ubuntu'
-      register: redis_install_output
-
-    - name: Install Redis Server (CentOS/RHEL)
+    - name: Install Redis Server (Amazon Linux)
       yum:
         name: redis
         state: present
-      when: os_distribution.stdout == 'centos' or os_distribution.stdout == 'rhel'
+      when: os_distribution.stdout == 'amzn'
       register: redis_install_output
 
     - name: Get Redis Server Version
       command: redis-server --version
       register: redis_version_output
       changed_when: false
+      when: os_distribution.stdout == 'amzn'
 
     - name: Display Results
       debug:
