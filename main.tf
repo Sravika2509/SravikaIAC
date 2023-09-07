@@ -7,7 +7,7 @@ provider "aws" {
 resource "aws_instance" "my_instances" {
   count = 8
 
-  ami           = "ami-05fa00d4c63e32376"  # Modify this to your desired AMI
+  ami           = "ami-053b0d53c279acc90"  # Modify this to your desired AMI
   instance_type = "t2.micro"  # Modify this to your desired instance type
 
   associate_public_ip_address = true  # Assign public IP addresses
