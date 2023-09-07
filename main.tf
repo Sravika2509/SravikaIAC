@@ -3,24 +3,29 @@ provider "aws" {
   region = "us-east-1"  # Modify this to your desired AWS region
 }
 
-# Create a VPC.
-resource "aws_vpc" "my_vpc" {
-  cidr_block = "10.0.0.0/16"  # Modify this CIDR block as needed
-}
+# Create EC2 instances in the default VPC.
+resource "aws_instance" "my_instances" {
+  count = 8
 
-# Create subnets in the VPC.
-resource "aws_subnet" "my_subnet" {
-  count             = 8
-  vpc_id            = aws_vpc.my_vpc.id
-  cidr_block        = "10.0.${count.index}.0/24"
-  availability_zone = "us-east-1a"  # Modify this to your desired AZ
+  ami           = "ami-05fa00d4c63e32376"  # Modify this to your desired AMI
+  instance_type = "t2.micro"  # Modify this to your desired instance type
+
+  associate_public_ip_address = true  # Assign public IP addresses
+
+  # Associate the instances with the security group
+  security_groups = [aws_security_group.my_security_group.name]
+  
+  key_name = "id_rsa"  # Replace with your SSH key pair name
+
+  tags = {
+    Name = "databaseserver-${count.index + 1}"
+  }
 }
 
 # Create a security group allowing inbound SSH and other necessary ports.
 resource "aws_security_group" "my_security_group" {
   name        = "my-security-group"
   description = "Allow SSH and other necessary ports"
-  vpc_id      = aws_vpc.my_vpc.id
 
   # Define your ingress rules here.
   # Example: allow SSH traffic from anywhere
@@ -32,27 +37,29 @@ resource "aws_security_group" "my_security_group" {
   }
 }
 
-# Create EC2 instances in the subnets.
-resource "aws_instance" "my_instances" {
-  count = 8
+# Output the public IP addresses and key file.
+output "public_ips" {
+  value = aws_instance.my_instances[*].public_ip
+}
 
-  ami           = "ami-05fa00d4c63e32376"  # Modify this to your desired AMI
-  instance_type = "t2.micro"  # Modify this to your desired instance type
+output "ssh_private_key" {
+  value = file("~/.ssh/id_rsa")  # Update this path to your SSH private key file
+}
 
-  subnet_id = aws_subnet.my_subnet[count.index].id
 
-  # Associate the instances with the security group
-  vpc_security_group_ids = [aws_security_group.my_security_group.id]
-  
-  key_name = "id_rsa"
+data "aws_key_pair" "my_key_pair" {
+  key_name = "id_rsa"  # Replace with your key pair name
+}
 
-  tags = {
-    Name = "server-${count.index + 1}"
+resource "null_resource" "save_key" {
+  triggers = {
+    key_fingerprint = data.aws_key_pair.my_key_pair.key_fingerprint
+  }
+
+  provisioner "local-exec" {
+    command = <<-EOT
+      echo '${data.aws_key_pair.my_key_pair.private_key}' > ~/.ssh/id_rsa.pem
+      chmod 400 ~/.ssh/id_rsa.pem
+    EOT
   }
 }
-
-# Output the private IP addresses of the EC2 instances.
-output "instance_ips" {
-  value = aws_instance.my_instances[*].private_ip
-}
-
