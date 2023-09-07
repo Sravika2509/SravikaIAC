@@ -3,42 +3,33 @@
   hosts: database_servers
   become: yes
   tasks:
-    - name: Update Package Cache (Amazon Linux)
-      command: "{{ item }}"
-      with_items:
-        - yum clean all
-        - yum makecache
-      when: os_distribution == 'amazon'
+    - name: Update Package Cache
+      apt:
+        update_cache: yes
 
-    - name: Install MySQL Server (Amazon Linux)
-      yum:
-        name: mysql
+    - name: Install MySQL Server
+      apt:
+        name: mysql-server
         state: present
-      when: os_distribution == 'amazon'
+
+    - name: Install Redis Server
+      apt:
+        name: redis-server
+        state: present
 
     - name: Get MySQL Server Version
-      command: mysql -v
+      command: mysql -V
       register: mysql_version_output
       changed_when: false
-      when: os_distribution == 'amazon'
-
-    - name: Install Redis Server (Amazon Linux)
-      yum:
-        name: redis
-        state: present
-      when: os_distribution == 'amazon'
 
     - name: Get Redis Server Version
       command: redis-server --version
       register: redis_version_output
       changed_when: false
-      when: os_distribution == 'amazon'
 
     - name: Display Results
       debug:
         var: "{{ item }}"
       with_items:
-        - mysql_install_output
-        - mysql_version_output
-        - redis_install_output
-        - redis_version_output
+        - mysql_version_output.stdout
+        - redis_version_output.stdout
